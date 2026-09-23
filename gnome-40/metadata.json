@@ -2,5 +2,6 @@
   "uuid": "primary-clipboard-sync@local",
   "name": "Primary/Clipboard Sync",
   "description": "Keep the PRIMARY selection and CLIPBOARD in sync",
-  "shell-version": ["40", "41", "42", "43", "44"]
+  "shell-version": ["40", "41", "42", "43", "44"],
+  "url": "https://github.com/kirxkirx/gnome-wayland-clipboard-sync"
 }

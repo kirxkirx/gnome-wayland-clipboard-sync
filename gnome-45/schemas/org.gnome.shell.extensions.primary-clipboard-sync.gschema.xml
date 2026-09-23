@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.primary-clipboard-sync"
+          path="/org/gnome/shell/extensions/primary-clipboard-sync/">
+    <key name="sync-primary-to-clipboard" type="b">
+      <default>true</default>
+      <summary>Copy PRIMARY to CLIPBOARD</summary>
+      <description>Selecting text also replaces what Ctrl+V pastes.</description>
+    </key>
+    <key name="sync-clipboard-to-primary" type="b">
+      <default>true</default>
+      <summary>Copy CLIPBOARD to PRIMARY</summary>
+      <description>Ctrl+C and copy buttons also feed middle-click paste.</description>
+    </key>
+  </schema>
+</schemalist>

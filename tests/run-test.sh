@@ -86,7 +86,7 @@ expect_no_sync() {
 # Install the extension
 EXTDIR="$HOME/.local/share/gnome-shell/extensions/$UUID"
 mkdir -p "$EXTDIR"
-cp "$REPO_DIR/metadata.json" "$REPO_DIR/extension.js" "$EXTDIR/"
+cp "$REPO_DIR/gnome-40/metadata.json" "$REPO_DIR/gnome-40/extension.js" "$EXTDIR/"
 
 # Start the virtual X server
 Xvfb :99 -screen 0 1280x1024x24 +extension GLX >/tmp/xvfb.log 2>&1 &

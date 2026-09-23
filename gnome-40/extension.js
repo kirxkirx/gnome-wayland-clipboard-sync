@@ -12,7 +12,6 @@ class Extension {
         this._selection = null;
         this._clipboard = null;
         this._handlerId = 0;
-        this._lastText = null;
     }
 
     enable() {
@@ -29,16 +28,18 @@ class Extension {
         }
         this._selection = null;
         this._clipboard = null;
-        this._lastText = null;
     }
 
     _copy(fromType, toType) {
         this._clipboard.get_text(fromType, (clipboard, text) => {
-            // _lastText stops the two selections echoing into each other
-            if (!this._clipboard || !text || text === this._lastText)
+            if (!this._clipboard || !text)
                 return;
-            this._lastText = text;
-            this._clipboard.set_text(toType, text);
+            // Only write when the destination differs; this also stops
+            // our own write from echoing back to the source
+            this._clipboard.get_text(toType, (clipboard2, current) => {
+                if (this._clipboard && current !== text)
+                    this._clipboard.set_text(toType, text);
+            });
         });
     }
 
