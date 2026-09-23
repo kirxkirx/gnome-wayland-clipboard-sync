@@ -22,7 +22,8 @@ changed the extension format:
 
 - `gnome-40/`: GNOME Shell 40 to 44. Tested on GNOME Shell 40.10
   (RHEL 9, Wayland session); CI runs it on Rocky Linux 9 and AlmaLinux 9.
-- `gnome-45/`: GNOME Shell 45 to 51. Not tested in CI yet.
+- `gnome-45/`: GNOME Shell 45 to 51. CI runs it headless (Wayland) on
+  Fedora 43, 44 and 45 (GNOME 49, 50 and 51).
 
 Both use the same UUID, so install only the one that matches your
 GNOME Shell version (`gnome-shell --version`).
@@ -30,7 +31,7 @@ GNOME Shell version (`gnome-shell --version`).
 ## Installation
 
     git clone https://github.com/kirxkirx/gnome-wayland-clipboard-sync.git
-    EXTDIR=~/.local/share/gnome-shell/extensions/primary-clipboard-sync@local
+    EXTDIR=~/.local/share/gnome-shell/extensions/gnome-wayland-clipboard-sync@kirxkirx.github.io
     mkdir -p "$EXTDIR"
 
 For GNOME 40 to 44:
@@ -45,7 +46,7 @@ For GNOME 45 and later:
 Log out and log back in (GNOME Shell cannot be restarted in place on
 Wayland), then:
 
-    gnome-extensions enable primary-clipboard-sync@local
+    gnome-extensions enable gnome-wayland-clipboard-sync@kirxkirx.github.io
 
 ## Configuration
 
@@ -55,7 +56,7 @@ also feed middle-click, but selecting does not affect Ctrl+V), turn off
 "Primary selection to clipboard":
 
 - GNOME 45 and later: in the extension preferences
-  (`gnome-extensions prefs primary-clipboard-sync@local`, or the
+  (`gnome-extensions prefs gnome-wayland-clipboard-sync@kirxkirx.github.io`, or the
   Extensions app). Changes take effect immediately.
 - GNOME 40 to 44: edit extension.js and set
 
@@ -65,8 +66,8 @@ also feed middle-click, but selecting does not affect Ctrl+V), turn off
 
 ## Uninstall
 
-    gnome-extensions disable primary-clipboard-sync@local
-    rm -r ~/.local/share/gnome-shell/extensions/primary-clipboard-sync@local
+    gnome-extensions disable gnome-wayland-clipboard-sync@kirxkirx.github.io
+    rm -r ~/.local/share/gnome-shell/extensions/gnome-wayland-clipboard-sync@kirxkirx.github.io
 
 ## License
 

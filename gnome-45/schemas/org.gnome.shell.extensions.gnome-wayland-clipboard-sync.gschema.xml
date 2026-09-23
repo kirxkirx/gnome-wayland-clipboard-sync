@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <schema id="org.gnome.shell.extensions.primary-clipboard-sync"
-          path="/org/gnome/shell/extensions/primary-clipboard-sync/">
+  <schema id="org.gnome.shell.extensions.gnome-wayland-clipboard-sync"
+          path="/org/gnome/shell/extensions/gnome-wayland-clipboard-sync/">
     <key name="sync-primary-to-clipboard" type="b">
       <default>true</default>
       <summary>Copy PRIMARY to CLIPBOARD</summary>

@@ -7,19 +7,31 @@ on:
 
 jobs:
   test:
+    name: ${{ matrix.ext }} on ${{ matrix.image }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        image: ["rockylinux:9", "almalinux:9"]
+        include:
+          - {image: "rockylinux:9", ext: gnome-40}   # GNOME 40
+          - {image: "almalinux:9", ext: gnome-40}    # GNOME 40
+          - {image: "fedora:43", ext: gnome-45}      # GNOME 49
+          - {image: "fedora:44", ext: gnome-45}      # GNOME 50
+          - {image: "fedora:45", ext: gnome-45}      # GNOME 51
     container:
       image: ${{ matrix.image }}
     steps:
       - name: Install dependencies
         run: |
-          dnf install -y epel-release
+          if [ "${{ matrix.ext }}" = gnome-40 ]; then
+              dnf install -y epel-release
+              EXTRA=/usr/bin/Xvfb
+          else
+              EXTRA=/usr/bin/Xwayland
+          fi
           dnf install -y git gnome-shell mesa-dri-drivers dconf procps-ng \
-              /usr/bin/Xvfb /usr/bin/xclip /usr/bin/dbus-run-session /usr/bin/gsettings
+              /usr/bin/xclip /usr/bin/dbus-run-session /usr/bin/gsettings \
+              /usr/bin/glib-compile-schemas $EXTRA
       - name: Prepare system services
         # GNOME Shell connects to the system bus unconditionally (e.g. for
         # UPower in the panel) and dies at startup if there is none, so
@@ -33,4 +45,4 @@ jobs:
           dbus-daemon --system --fork
       - uses: actions/checkout@v4
       - name: Run extension test
-        run: tests/run-test.sh
+        run: tests/run-test.sh ${{ matrix.ext }}

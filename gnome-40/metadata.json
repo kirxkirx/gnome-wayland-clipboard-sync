@@ -1,7 +1,7 @@
 {
-  "uuid": "primary-clipboard-sync@local",
+  "uuid": "gnome-wayland-clipboard-sync@kirxkirx.github.io",
   "name": "Primary/Clipboard Sync",
-  "description": "Keep the PRIMARY selection and CLIPBOARD in sync",
+  "description": "Keeps the PRIMARY selection (select text, paste with the middle mouse button) and the CLIPBOARD (Ctrl+C, Ctrl+V) in sync.\n\nThis extension reads and writes the clipboard and the primary selection. It does not store their contents or send them anywhere.",
   "shell-version": ["40", "41", "42", "43", "44"],
   "url": "https://github.com/kirxkirx/gnome-wayland-clipboard-sync"
 }
