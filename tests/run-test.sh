@@ -179,6 +179,12 @@ expect_sync primary clipboard "primary to clipboard $$"
 expect_sync clipboard primary $'multi-line text\nsecond line'
 expect_sync primary clipboard "second primary change $$"
 
+# Copying non-text content (here an image) must not crash the Shell
+printf '\x89PNG\r\n' | xclip -selection clipboard -t image/png >/dev/null 2>&1
+sleep 2
+shell_alive
+echo "PASS: non-text clipboard content"
+
 if [ "$EXT" = gnome-45 ]; then
     # One-way sync, switched in the preferences without a restart
     set_pref sync-primary-to-clipboard false

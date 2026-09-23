@@ -4,6 +4,13 @@ import St from 'gi://St';
 
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
+const TEXT_MIMETYPES = [
+    'text/plain;charset=utf-8',
+    'UTF8_STRING',
+    'text/plain',
+    'STRING',
+];
+
 export default class PrimaryClipboardSyncExtension extends Extension {
     enable() {
         this._settings = this.getSettings();
@@ -23,17 +30,28 @@ export default class PrimaryClipboardSyncExtension extends Extension {
         this._settings = null;
     }
 
-    _copy(fromType, toType) {
-        this._clipboard.get_text(fromType, (clipboard, text) => {
-            if (!this._clipboard || !text)
-                return;
-            // Only write when the destination differs; this also stops
-            // our own write from echoing back to the source
-            this._clipboard.get_text(toType, (clipboard2, current) => {
-                if (this._clipboard && current !== text)
-                    this._clipboard.set_text(toType, text);
-            });
+    _getText(type) {
+        // When a selection holds no text, get_text() runs the callback
+        // before returning, which crashes GNOME Shell 49 to 51. So only
+        // call it when the selection offers one of the text types that
+        // St.Clipboard reads (supported_mimetypes in st-clipboard.c).
+        const mimetypes = this._clipboard.get_mimetypes(type);
+        if (!mimetypes.some(m => TEXT_MIMETYPES.includes(m)))
+            return Promise.resolve(null);
+        return new Promise(resolve => {
+            this._clipboard.get_text(type, (clipboard, text) => resolve(text));
         });
+    }
+
+    async _copy(fromType, toType) {
+        const text = await this._getText(fromType);
+        if (!this._clipboard || !text)
+            return;
+        // Only write when the destination differs; this also stops
+        // our own write from echoing back to the source
+        const current = await this._getText(toType);
+        if (this._clipboard && current !== text)
+            this._clipboard.set_text(toType, text);
     }
 
     _onOwnerChanged(selection, selectionType, source) {
