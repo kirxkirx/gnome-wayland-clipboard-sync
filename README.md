@@ -1,5 +1,7 @@
 # Primary/Clipboard Sync
 
+[![test](https://github.com/kirxkirx/gnome-wayland-clipboard-sync/actions/workflows/test.yml/badge.svg)](https://github.com/kirxkirx/gnome-wayland-clipboard-sync/actions/workflows/test.yml)
+
 A tiny GNOME Shell extension that keeps the two X11/Wayland selection
 buffers in sync:
 
@@ -21,10 +23,10 @@ and are not supported.
 
 ## Installation
 
-    git clone https://github.com/kirxkirx/primary-clipboard-sync.git
+    git clone https://github.com/kirxkirx/gnome-wayland-clipboard-sync.git
     EXTDIR=~/.local/share/gnome-shell/extensions/primary-clipboard-sync@local
     mkdir -p "$EXTDIR"
-    cp primary-clipboard-sync/metadata.json primary-clipboard-sync/extension.js "$EXTDIR/"
+    cp gnome-wayland-clipboard-sync/metadata.json primary-clipboard-sync/extension.js "$EXTDIR/"
 
 Log out and log back in (GNOME Shell cannot be restarted in place on
 Wayland), then:

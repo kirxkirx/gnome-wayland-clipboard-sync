@@ -1,0 +1,25 @@
+name: test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["rockylinux:9", "almalinux:9"]
+    container:
+      image: ${{ matrix.image }}
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y epel-release
+          dnf install -y git gnome-shell mesa-dri-drivers dconf procps-ng \
+              /usr/bin/Xvfb /usr/bin/xclip /usr/bin/dbus-run-session /usr/bin/gsettings
+      - uses: actions/checkout@v4
+      - name: Run extension test
+        run: tests/run-test.sh
