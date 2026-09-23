@@ -20,13 +20,17 @@ jobs:
           dnf install -y epel-release
           dnf install -y git gnome-shell mesa-dri-drivers dconf procps-ng \
               /usr/bin/Xvfb /usr/bin/xclip /usr/bin/dbus-run-session /usr/bin/gsettings
-      - name: Remove stale logind marker
+      - name: Prepare system services
+        # GNOME Shell connects to the system bus unconditionally (e.g. for
+        # UPower in the panel) and dies at startup if there is none, so
+        # start a system bus. logind is still not running, but
         # systemd-tmpfiles (run by the package scriptlets) creates
-        # /run/systemd/seats, which makes GNOME Shell assume logind is
-        # running and connect to the system bus. There is no system bus
-        # in the container, so the Shell dies at startup. Without this
-        # directory it falls back to its dummy login manager.
-        run: rm -rf /run/systemd/seats
+        # /run/systemd/seats, which makes the Shell assume it is; remove
+        # it so the Shell falls back to its dummy login manager.
+        run: |
+          rm -rf /run/systemd/seats
+          mkdir -p /run/dbus
+          dbus-daemon --system --fork
       - uses: actions/checkout@v4
       - name: Run extension test
         run: tests/run-test.sh
