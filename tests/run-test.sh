@@ -53,9 +53,13 @@ trap cleanup EXIT
 
 die() {
     echo "ERROR: $*"
-    echo "---- last 100 lines of the gnome-shell log ----"
-    tail -n 100 "$SHELL_LOG" 2>/dev/null
+    echo "---- last 200 lines of the gnome-shell log ----"
+    tail -n 200 "$SHELL_LOG" 2>/dev/null
     exit 1
+}
+
+shell_alive() {
+    kill -0 "$SHELL_PID" 2>/dev/null || die "gnome-shell exited"
 }
 
 set_sel() {
@@ -81,6 +85,8 @@ set_pref() {
 expect_sync() {
     local src=$1 dst=$2 text=$3 got="" i
     set_sel "$src" "$text"
+    sleep 0.25
+    shell_alive
     for i in $(seq 1 20); do
         got=$(get_sel "$dst")
         if [ "$got" = "$text" ]; then
@@ -98,6 +104,7 @@ expect_no_sync() {
     local src=$1 dst=$2 text=$3 why=$4 got
     set_sel "$src" "$text"
     sleep 3
+    shell_alive
     got=$(get_sel "$dst")
     if [ "$got" = "$text" ]; then
         echo "FAIL: $src -> $dst synced $why"
@@ -130,14 +137,18 @@ if [ "$EXT" = gnome-40 ]; then
     gnome-shell --x11 >"$SHELL_LOG" 2>&1 &
     SHELL_PID=$!
 else
-    gnome-shell --headless --wayland --virtual-monitor 1280x1024 \
+    # Run under gdb, so that a crash leaves C and JS backtraces in the log
+    gdb -q -batch \
+        -ex 'handle SIGPIPE SIGUSR1 SIGUSR2 SIGHUP nostop noprint pass' \
+        -ex run -ex bt -ex 'call (void) gjs_dumpstack()' \
+        --args gnome-shell --headless --wayland --virtual-monitor 1280x1024 \
         >"$SHELL_LOG" 2>&1 &
     SHELL_PID=$!
 fi
 
 STATE=""
 for i in $(seq 1 90); do
-    kill -0 "$SHELL_PID" 2>/dev/null || die "gnome-shell exited"
+    shell_alive
     STATE=$(extension_state)
     [ "$STATE" = "ENABLED" ] && break
     case "$STATE" in

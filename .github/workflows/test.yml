@@ -27,11 +27,16 @@ jobs:
               dnf install -y epel-release
               EXTRA=/usr/bin/Xvfb
           else
-              EXTRA=/usr/bin/Xwayland
+              EXTRA="/usr/bin/Xwayland gdb"
           fi
           dnf install -y git gnome-shell mesa-dri-drivers dconf procps-ng \
               /usr/bin/xclip /usr/bin/dbus-run-session /usr/bin/gsettings \
               /usr/bin/glib-compile-schemas $EXTRA
+          if [ "${{ matrix.ext }}" = gnome-45 ]; then
+              # Debug symbols for readable backtraces if gnome-shell crashes
+              dnf debuginfo-install -y mutter gnome-shell gjs ||
+                  echo "WARNING: debug symbols not installed"
+          fi
       - name: Prepare system services
         # GNOME Shell connects to the system bus unconditionally (e.g. for
         # UPower in the panel) and dies at startup if there is none, so
