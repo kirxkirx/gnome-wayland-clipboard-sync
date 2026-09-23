@@ -48,7 +48,7 @@ jobs:
           rm -rf /run/systemd/seats
           mkdir -p /run/dbus
           dbus-daemon --system --fork
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run extension test
         run: tests/run-test.sh ${{ matrix.ext }}
 
@@ -56,8 +56,8 @@ jobs:
     name: Shexli static analysis
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install Shexli
