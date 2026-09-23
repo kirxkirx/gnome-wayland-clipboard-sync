@@ -69,6 +69,15 @@ also feed middle-click, but selecting does not affect Ctrl+V), turn off
     gnome-extensions disable gnome-wayland-clipboard-sync@kirxkirx.github.io
     rm -r ~/.local/share/gnome-shell/extensions/gnome-wayland-clipboard-sync@kirxkirx.github.io
 
+## Releases
+
+Publishing a GitHub release attaches two ZIP files, ready to upload to
+extensions.gnome.org: `...-gnome-40.zip` (GNOME 40 to 44) and
+`...-gnome-45.zip` (GNOME 45 and later). Both use the same UUID, so
+upload both. To build them locally, run `tools/pack.sh`; CI checks them
+with the [Shexli](https://pypi.org/project/shexli/) static analyzer
+(`tests/run-shexli.sh dist/*.zip`).
+
 ## License
 
 GPL-2.0-or-later
