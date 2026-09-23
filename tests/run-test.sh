@@ -68,7 +68,9 @@ get_sel() {
 }
 
 extension_state() {
-    gnome-extensions info "$UUID" 2>/dev/null | sed -n 's/^ *State: *//p'
+    # GNOME 45 and later report an enabled extension as ACTIVE
+    gnome-extensions info "$UUID" 2>/dev/null |
+        sed -n 's/^ *State: *//p' | sed 's/^ACTIVE$/ENABLED/'
 }
 
 set_pref() {
@@ -138,7 +140,9 @@ for i in $(seq 1 90); do
     kill -0 "$SHELL_PID" 2>/dev/null || die "gnome-shell exited"
     STATE=$(extension_state)
     [ "$STATE" = "ENABLED" ] && break
-    [ "$STATE" = "ERROR" ] && die "extension is in ERROR state"
+    case "$STATE" in
+        ERROR|OUT*) die "extension is in $STATE state" ;;
+    esac
     sleep 1
 done
 [ "$STATE" = "ENABLED" ] || die "extension not enabled after 90 s (state: '$STATE')"
