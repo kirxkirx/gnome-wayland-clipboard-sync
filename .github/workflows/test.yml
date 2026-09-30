@@ -6,6 +6,17 @@ on:
   workflow_dispatch:
 
 jobs:
+  sync-order:
+    name: Async sync ordering
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run ordering regression tests
+        run: node --test tests/test-sync-order.cjs
+
   test:
     name: ${{ matrix.ext }} on ${{ matrix.image }}
     runs-on: ubuntu-latest

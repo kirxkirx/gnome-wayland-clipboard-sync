@@ -12,6 +12,8 @@ const TEXT_MIMETYPES = [
 ];
 
 export default class PrimaryClipboardSyncExtension extends Extension {
+    _seq = 0n;
+
     enable() {
         this._settings = this.getSettings();
         this._selection = global.display.get_selection();
@@ -21,6 +23,7 @@ export default class PrimaryClipboardSyncExtension extends Extension {
     }
 
     disable() {
+        ++this._seq;
         if (this._handlerId) {
             this._selection.disconnect(this._handlerId);
             this._handlerId = 0;
@@ -43,25 +46,31 @@ export default class PrimaryClipboardSyncExtension extends Extension {
         });
     }
 
-    async _copy(fromType, toType) {
+    async _copy(fromType, toType, seq) {
         const text = await this._getText(fromType);
-        if (!this._clipboard || !text)
+        if (!this._clipboard || !text || seq !== this._seq)
             return;
         // Only write when the destination differs; this also stops
         // our own write from echoing back to the source
         const current = await this._getText(toType);
-        if (this._clipboard && current !== text)
+        if (this._clipboard && seq === this._seq && current !== text)
             this._clipboard.set_text(toType, text);
     }
 
     _onOwnerChanged(selection, selectionType, source) {
+        if (selectionType !== Meta.SelectionType.SELECTION_PRIMARY &&
+            selectionType !== Meta.SelectionType.SELECTION_CLIPBOARD)
+            return;
+        // Shell callbacks run on one thread: increment before any async reads.
+        // Even clearing a selection must invalidate older pending transfers.
+        const seq = ++this._seq;
         if (!source)
             return;
         if (selectionType === Meta.SelectionType.SELECTION_PRIMARY &&
             this._settings.get_boolean('sync-primary-to-clipboard'))
-            this._copy(St.ClipboardType.PRIMARY, St.ClipboardType.CLIPBOARD);
+            this._copy(St.ClipboardType.PRIMARY, St.ClipboardType.CLIPBOARD, seq);
         else if (selectionType === Meta.SelectionType.SELECTION_CLIPBOARD &&
                  this._settings.get_boolean('sync-clipboard-to-primary'))
-            this._copy(St.ClipboardType.CLIPBOARD, St.ClipboardType.PRIMARY);
+            this._copy(St.ClipboardType.CLIPBOARD, St.ClipboardType.PRIMARY, seq);
     }
 }
