@@ -35,7 +35,9 @@ jobs:
           if command -v apt-get >/dev/null; then
               export DEBIAN_FRONTEND=noninteractive
               apt-get update
-              apt-get install -y git gnome-shell xvfb xclip dbus \
+              # gnome-extensions talks to a D-Bus service that runs
+              # /usr/bin/gjs, which Ubuntu's gnome-shell does not pull in
+              apt-get install -y git gnome-shell gjs xvfb xclip dbus \
                   dconf-gsettings-backend libglib2.0-bin libgl1-mesa-dri procps
               exit
           fi
