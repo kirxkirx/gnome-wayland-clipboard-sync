@@ -5,8 +5,9 @@
 #
 # Writes dist/gnome-wayland-clipboard-sync[-LABEL]-gnome-40.zip (GNOME 40-44)
 # and dist/gnome-wayland-clipboard-sync[-LABEL]-gnome-45.zip (GNOME 45+).
-# The ZIPs contain only the files the extension needs; compiled schemas
-# are left out, since GNOME 44 and later compile them on install.
+# The ZIPs contain only the files tracked in git, so stray files (editor
+# backups, compiled schemas) stay out; GNOME 44 and later compile the
+# schemas on install.
 
 set -eu
 
@@ -19,7 +20,7 @@ for ext in gnome-40 gnome-45; do
     zip_file="$DIST/$NAME-$ext.zip"
     rm -f "$zip_file"
     (cd "$REPO_DIR/$ext" &&
-        zip -q -X -r "$zip_file" . -x 'schemas/gschemas.compiled')
+        git ls-files -z | xargs -0 zip -q -X "$zip_file")
     echo "$zip_file"
     unzip -l "$zip_file" | sed 's/^/    /'
 done

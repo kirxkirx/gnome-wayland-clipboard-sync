@@ -8,16 +8,13 @@ export default class PrimaryClipboardSyncPreferences extends ExtensionPreference
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
         const page = new Adw.PreferencesPage();
-        const group = new Adw.PreferencesGroup({
-            title: 'Sync direction',
-            description: 'Changes take effect immediately.',
-        });
+        const group = new Adw.PreferencesGroup({title: 'Sync Direction'});
         page.add(group);
 
         const rows = [
-            ['sync-clipboard-to-primary', 'Clipboard to primary selection',
+            ['sync-clipboard-to-primary', 'Clipboard to Primary Selection',
                 'Ctrl+C and copy buttons also feed middle-click paste'],
-            ['sync-primary-to-clipboard', 'Primary selection to clipboard',
+            ['sync-primary-to-clipboard', 'Primary Selection to Clipboard',
                 'Selecting text also replaces what Ctrl+V pastes'],
         ];
         for (const [key, title, subtitle] of rows) {

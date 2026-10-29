@@ -7,19 +7,26 @@
 
 set -u
 
-# shexli 0.2.1 treats any shell-version above 50 as a future release,
-# although GNOME 51 is out. Remove once shexli knows about GNOME 51.
-IGNORED_ERRORS="EGO-M-004"
-
 FAILED=0
 for path in "$@"; do
     # shexli needs an absolute path
     path=$(realpath "$path")
     echo "=== $path"
     shexli "$path"
-    shexli --format json "$path" | IGNORED_ERRORS="$IGNORED_ERRORS" python3 -c '
-import json, os, sys
-ignored = os.environ["IGNORED_ERRORS"].split()
+    shexli --format json "$path" | EXT_PATH="$path" python3 -c '
+import json, os, sys, zipfile
+path = os.environ["EXT_PATH"]
+if os.path.isdir(path):
+    with open(os.path.join(path, "metadata.json")) as f:
+        metadata = json.load(f)
+else:
+    metadata = json.loads(zipfile.ZipFile(path).read("metadata.json"))
+# shexli 0.2.1, the latest on PyPI, treats any shell-version above 50 as
+# a future release, although GNOME 51 is out. extensions.gnome.org runs a
+# fixed copy (extensions-web issue 399), so ignore only that false positive.
+ignored = []
+if max(int(v.split(".")[0]) for v in metadata["shell-version"]) == 51:
+    ignored.append("EGO-M-004")
 errors = [f["rule_id"] for f in json.load(sys.stdin)["findings"]
           if f["severity"] == "error"]
 for rule in errors:

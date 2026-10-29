@@ -12,6 +12,7 @@ class Extension {
         this._selection = null;
         this._clipboard = null;
         this._handlerId = 0;
+        this._serial = 0;
     }
 
     enable() {
@@ -28,23 +29,45 @@ class Extension {
         }
         this._selection = null;
         this._clipboard = null;
+        // get_text() cannot be cancelled, so make copies that are still
+        // reading drop their result
+        this._serial++;
     }
 
-    _copy(fromType, toType) {
-        this._clipboard.get_text(fromType, (clipboard, text) => {
-            if (!this._clipboard || !text)
-                return;
-            // Only write when the destination differs; this also stops
-            // our own write from echoing back to the source
-            this._clipboard.get_text(toType, (clipboard2, current) => {
-                if (this._clipboard && current !== text)
-                    this._clipboard.set_text(toType, text);
-            });
+    _getText(type) {
+        // get_text() runs the callback before returning when the selection
+        // holds no text, and a get_text() call made from inside that
+        // callback crashes GNOME Shell with GJS 1.72.4 and later. Resolving
+        // a Promise keeps the rest of _copy() out of the callback.
+        return new Promise(resolve => {
+            this._clipboard.get_text(type, (clipboard, text) => resolve(text));
         });
     }
 
+    async _copy(fromType, toType) {
+        const serial = this._serial;
+        const text = await this._getText(fromType);
+        if (serial !== this._serial || !text)
+            return;
+        // Only write when the destination differs; this also stops
+        // our own write from echoing back to the source
+        const current = await this._getText(toType);
+        if (serial === this._serial && current !== text)
+            this._clipboard.set_text(toType, text);
+    }
+
     _onOwnerChanged(selection, selectionType, source) {
-        if (!source)
+        if (!source || selectionType === Meta.SelectionType.SELECTION_DND)
+            return;
+        const mimetypes = source.get_mimetypes();
+        // Ignore cleared selections (no types), so that they do not stop
+        // a pending copy into them, as after Ctrl+X in GTK 4
+        if (!mimetypes.length)
+            return;
+        // Copies that are still reading older content are now stale
+        this._serial++;
+        // Leave alone passwords that password managers mark as secret
+        if (mimetypes.includes('x-kde-passwordManagerHint'))
             return;
         if (selectionType === Meta.SelectionType.SELECTION_PRIMARY &&
             SYNC_PRIMARY_TO_CLIPBOARD)

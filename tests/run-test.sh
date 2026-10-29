@@ -17,6 +17,14 @@ case "$EXT" in
     *) echo "Usage: $0 gnome-40|gnome-45"; exit 2 ;;
 esac
 
+# The test replaces the installed extension, rewrites the user's
+# enabled-extensions setting and kills xclip, so only run it in a
+# disposable container, as CI does (toolbox and distrobox share $HOME)
+if [ -z "${CI:-}" ]; then
+    echo "$0: only run this in a disposable container, with CI=1 set"
+    exit 2
+fi
+
 UUID=gnome-wayland-clipboard-sync@kirxkirx.github.io
 SCHEMA=org.gnome.shell.extensions.gnome-wayland-clipboard-sync
 REPO_DIR=$(cd "$(dirname "$0")/.." && pwd)
@@ -72,7 +80,7 @@ get_sel() {
 }
 
 extension_state() {
-    # GNOME 45 and later report an enabled extension as ACTIVE
+    # GNOME 46 and later report an enabled extension as ACTIVE
     gnome-extensions info "$UUID" 2>/dev/null |
         sed -n 's/^ *State: *//p' | sed 's/^ACTIVE$/ENABLED/'
 }

@@ -4,17 +4,26 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+  # Weekly, to notice distribution updates that break the extension
+  schedule:
+    - cron: "23 5 * * 1"
+
+permissions:
+  contents: read
 
 jobs:
   test:
     name: ${{ matrix.ext }} on ${{ matrix.image }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         include:
-          - {image: "rockylinux:9", ext: gnome-40}   # GNOME 40
+          - {image: "rockylinux/rockylinux:9", ext: gnome-40}   # GNOME 40
           - {image: "almalinux:9", ext: gnome-40}    # GNOME 40
+          - {image: "ubuntu:22.04", ext: gnome-40}   # GNOME 42, gjs 1.72.4
+          - {image: "debian:12", ext: gnome-40}      # GNOME 43
           - {image: "fedora:43", ext: gnome-45}      # GNOME 49
           - {image: "fedora:44", ext: gnome-45}      # GNOME 50
           - {image: "fedora:45", ext: gnome-45}      # GNOME 51
@@ -23,6 +32,13 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
+          if command -v apt-get >/dev/null; then
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update
+              apt-get install -y git gnome-shell xvfb xclip dbus \
+                  dconf-gsettings-backend libglib2.0-bin libgl1-mesa-dri procps
+              exit
+          fi
           if [ "${{ matrix.ext }}" = gnome-40 ]; then
               dnf install -y epel-release
               EXTRA=/usr/bin/Xvfb
@@ -55,6 +71,7 @@ jobs:
   shexli:
     name: Shexli static analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
