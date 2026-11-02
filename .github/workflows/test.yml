@@ -36,9 +36,12 @@ jobs:
               export DEBIAN_FRONTEND=noninteractive
               apt-get update
               # gnome-extensions talks to a D-Bus service that runs
-              # /usr/bin/gjs, which Ubuntu's gnome-shell does not pull in
+              # /usr/bin/gjs, which Ubuntu's gnome-shell does not pull in.
+              # curl fetches the release and extensions.gnome.org ZIPs,
+              # unzip is what GNOME Shell extracts downloaded extensions with.
               apt-get install -y git gnome-shell gjs xvfb xclip dbus \
-                  dconf-gsettings-backend libglib2.0-bin libgl1-mesa-dri procps
+                  dconf-gsettings-backend libglib2.0-bin libgl1-mesa-dri procps \
+                  curl ca-certificates unzip
               exit
           fi
           if [ "${{ matrix.ext }}" = gnome-40 ]; then
@@ -47,9 +50,11 @@ jobs:
           else
               EXTRA="/usr/bin/Xwayland gdb"
           fi
+          # curl fetches the release and extensions.gnome.org ZIPs, unzip is
+          # what GNOME Shell extracts downloaded extensions with
           dnf install -y git gnome-shell mesa-dri-drivers dconf procps-ng \
               /usr/bin/xclip /usr/bin/dbus-run-session /usr/bin/gsettings \
-              /usr/bin/glib-compile-schemas $EXTRA
+              /usr/bin/glib-compile-schemas /usr/bin/curl /usr/bin/unzip $EXTRA
           if [ "${{ matrix.ext }}" = gnome-45 ]; then
               # Debug symbols for readable backtraces if gnome-shell crashes
               dnf debuginfo-install -y mutter gnome-shell gjs ||
@@ -67,8 +72,21 @@ jobs:
           mkdir -p /run/dbus
           dbus-daemon --system --fork
       - uses: actions/checkout@v5
-      - name: Run extension test
-        run: tests/run-test.sh ${{ matrix.ext }}
+      # One run per installation method in README.md. The first one tests
+      # this checkout; the others test the copies published on GitHub
+      # releases and extensions.gnome.org, which may be older, and the
+      # README commands that fetch them.
+      - name: Test the checkout, copied into place
+        run: tests/run-test.sh ${{ matrix.ext }} local
+      - name: Test the latest GitHub release ZIP
+        if: ${{ !cancelled() }}
+        run: tests/run-test.sh ${{ matrix.ext }} release
+      - name: Test the README curl one-liner (extensions.gnome.org)
+        if: ${{ !cancelled() }}
+        run: tests/run-test.sh ${{ matrix.ext }} ego-curl
+      - name: Test the README gdbus call (extensions.gnome.org)
+        if: ${{ !cancelled() }}
+        run: tests/run-test.sh ${{ matrix.ext }} ego-dbus
 
   shexli:
     name: Shexli static analysis

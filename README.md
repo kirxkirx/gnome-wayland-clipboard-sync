@@ -30,6 +30,12 @@ changed the extension format:
 Both use the same UUID, so install only the one that matches your
 GNOME Shell version (`gnome-shell --version`).
 
+On each of those systems, CI installs the extension four ways: from the
+checkout, from the latest GitHub release ZIP, and from
+extensions.gnome.org with the curl one-liner and the gdbus call below,
+so the published copies and the installation instructions get tested
+too.
+
 ## Installation
 
 ### From extensions.gnome.org
@@ -65,13 +71,12 @@ scenes:
 GNOME Shell shows its "Install extension?" dialog and then enables the
 extension.
 
-Alternatively, download the ZIP from the site and install it like a
-release ZIP. This needs no browser integration and no running GNOME
-session, but, like the methods below, a logout and login afterwards.
-Replace 40 with the major version from `gnome-shell --version`:
+Alternatively, download the ZIP for your GNOME Shell version from the
+site and install it like a release ZIP. This needs no browser
+integration and no running GNOME session, but, like the methods below,
+a logout and login afterwards:
 
-    curl -LO 'https://extensions.gnome.org/download-extension/gnome-wayland-clipboard-sync@kirxkirx.github.io.shell-extension.zip?shell_version=40'
-    gnome-extensions install --force gnome-wayland-clipboard-sync@kirxkirx.github.io.shell-extension.zip
+    curl -sSL -o /tmp/primary-clipboard-sync.zip "https://extensions.gnome.org/download-extension/gnome-wayland-clipboard-sync@kirxkirx.github.io.shell-extension.zip?shell_version=$(gnome-shell --version | grep -oE '[0-9]+' | head -1)" && gnome-extensions install --force /tmp/primary-clipboard-sync.zip
 
 ### From a GitHub release
 
