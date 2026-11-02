@@ -32,15 +32,50 @@ GNOME Shell version (`gnome-shell --version`).
 
 ## Installation
 
-The easiest way is from
-[extensions.gnome.org](https://extensions.gnome.org/extension/11049/primaryclipboard-sync/):
-turn on the switch on that page (this needs the GNOME Shell browser
-integration, see the site's [About](https://extensions.gnome.org/about/)
-page), or search for "Primary/Clipboard Sync" in Extension Manager.
-The site picks the version that matches your GNOME Shell, and the
-extension is enabled right away, with no logout.
+### From extensions.gnome.org
 
-From a GitHub release: download the ZIP that matches your GNOME version
+The extension is published at
+[extensions.gnome.org](https://extensions.gnome.org/extension/11049/primaryclipboard-sync/).
+The site serves the build that matches your GNOME Shell, and GNOME
+Shell loads and enables it right away, with no logout. There are three
+ways to install from there.
+
+In a web browser: turn on the switch on the extension page. This needs
+the GNOME Shell browser integration, which is a browser add-on plus a
+native connector package (`chrome-gnome-shell` on RHEL 9,
+`gnome-browser-connector` on newer distributions), see the site's
+[About](https://extensions.gnome.org/about/) page.
+
+With Extension Manager: a third-party application that is not part of
+a standard GNOME install (RHEL 9 and EPEL do not package it; it is on
+Flathub as `com.mattjakeman.ExtensionManager`). Search for
+"Primary/Clipboard Sync" in its Browse tab. GNOME's own Extensions app
+(`gnome-extensions-app`) only manages extensions that are already
+installed and cannot browse the site.
+
+From a terminal inside the GNOME session, by asking GNOME Shell
+directly, which is what the browser and Extension Manager do behind the
+scenes:
+
+    gdbus call --session --dest org.gnome.Shell.Extensions \
+        --object-path /org/gnome/Shell/Extensions \
+        --method org.gnome.Shell.Extensions.InstallRemoteExtension \
+        gnome-wayland-clipboard-sync@kirxkirx.github.io
+
+GNOME Shell shows its "Install extension?" dialog and then enables the
+extension.
+
+Alternatively, download the ZIP from the site and install it like a
+release ZIP. This needs no browser integration and no running GNOME
+session, but, like the methods below, a logout and login afterwards.
+Replace 40 with the major version from `gnome-shell --version`:
+
+    curl -LO 'https://extensions.gnome.org/download-extension/gnome-wayland-clipboard-sync@kirxkirx.github.io.shell-extension.zip?shell_version=40'
+    gnome-extensions install --force gnome-wayland-clipboard-sync@kirxkirx.github.io.shell-extension.zip
+
+### From a GitHub release
+
+Download the ZIP that matches your GNOME version
 (`-gnome-40.zip` for GNOME 40 to 44, `-gnome-45.zip` for GNOME 45 and
 later) from the
 [latest release](https://github.com/kirxkirx/gnome-wayland-clipboard-sync/releases/latest)
@@ -48,7 +83,7 @@ and install it, e.g.
 
     gnome-extensions install --force gnome-wayland-clipboard-sync-*-gnome-40.zip
 
-Or from source:
+### From source
 
     git clone https://github.com/kirxkirx/gnome-wayland-clipboard-sync.git
     EXTDIR=~/.local/share/gnome-shell/extensions/gnome-wayland-clipboard-sync@kirxkirx.github.io
@@ -62,6 +97,8 @@ For GNOME 45 and later:
 
     cp -r gnome-wayland-clipboard-sync/gnome-45/* "$EXTDIR/"
     glib-compile-schemas "$EXTDIR/schemas"
+
+### Enabling a ZIP or source install
 
 After installing from a ZIP or from source, log out and log back in
 (GNOME Shell only looks for new extensions when it starts, and it
