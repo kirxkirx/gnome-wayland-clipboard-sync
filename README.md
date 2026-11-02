@@ -32,7 +32,15 @@ GNOME Shell version (`gnome-shell --version`).
 
 ## Installation
 
-From a release: download the ZIP that matches your GNOME version
+The easiest way is from
+[extensions.gnome.org](https://extensions.gnome.org/extension/11049/primaryclipboard-sync/):
+turn on the switch on that page (this needs the GNOME Shell browser
+integration, see the site's [About](https://extensions.gnome.org/about/)
+page), or search for "Primary/Clipboard Sync" in Extension Manager.
+The site picks the version that matches your GNOME Shell, and the
+extension is enabled right away, with no logout.
+
+From a GitHub release: download the ZIP that matches your GNOME version
 (`-gnome-40.zip` for GNOME 40 to 44, `-gnome-45.zip` for GNOME 45 and
 later) from the
 [latest release](https://github.com/kirxkirx/gnome-wayland-clipboard-sync/releases/latest)
@@ -55,15 +63,35 @@ For GNOME 45 and later:
     cp -r gnome-wayland-clipboard-sync/gnome-45/* "$EXTDIR/"
     glib-compile-schemas "$EXTDIR/schemas"
 
-Either way, log out and log back in (GNOME Shell only looks for new
-extensions when it starts, and it cannot be restarted in place on
-Wayland), then:
+After installing from a ZIP or from source, log out and log back in
+(GNOME Shell only looks for new extensions when it starts, and it
+cannot be restarted in place on Wayland), then:
 
     gnome-extensions enable gnome-wayland-clipboard-sync@kirxkirx.github.io
 
 Running `enable` before logging back in fails with "Extension ... does
 not exist". `gnome-extensions info gnome-wayland-clipboard-sync@kirxkirx.github.io`
 should now show the state ENABLED (ACTIVE on GNOME 46 and later).
+
+## Version numbers
+
+GitHub releases and extensions.gnome.org number this extension
+differently. Because GNOME 45 changed the extension format, GNOME 40 to
+44 and GNOME 45 and later need different builds of the extension (see
+Compatibility), so every GitHub release is uploaded to
+extensions.gnome.org as two ZIPs, and extensions.gnome.org gives each
+uploaded ZIP its own version number. One GitHub release is therefore
+two extensions.gnome.org versions:
+
+| GitHub release | extensions.gnome.org version | GNOME Shell |
+|----------------|------------------------------|-------------|
+| v1             | 1 (replaced before review)   | 40 to 44    |
+| v1             | 2 (replaced before review)   | 45 to 51    |
+| v2             | 3                            | 40 to 44    |
+| v2             | 4                            | 45 to 51    |
+
+extensions.gnome.org also writes the `version` key into `metadata.json`
+itself, which is why the copies in this repository have none.
 
 ## Configuration
 
